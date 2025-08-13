@@ -1,0 +1,49 @@
+from models.students import Students
+from schemas.students import StudentRead, StudentCreate, StudentUpdate
+from fastapi import HTTPException
+from sqlmodel import Session, select
+from datetime import datetime
+
+def get_students(session: Session):
+    students = session.exec(select(Students)).all()
+    return [StudentRead.model_validate(stu) for stu in students]
+
+def get_student(student_id: str, session: Session):
+    student = session.get(Students, student_id)
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+    return StudentRead.model_validate(student)
+
+def create_student(student_data: StudentCreate, session: Session):
+    new_student = Students(
+        user_id=student_data.user_id,
+        class_id=student_data.class_id,
+    )
+    
+    session.add(new_student)
+    session.commit()
+    session.refresh(new_student)
+    
+    return StudentRead.model_validate(new_student)
+
+def update_student(student_id: str, student_data: StudentUpdate, session: Session):
+    student = session.get(Students, student_id)
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+    
+    update_data = student_data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(student, key, value)
+
+    session.commit()
+    session.refresh(student)
+    return StudentRead.model_validate(student)
+
+def delete_student(student_id: str, session: Session):
+    student = session.get(Students, student_id)
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+    
+    session.delete(student)
+    session.commit()
+    return {"message": "Student deleted successfully"}

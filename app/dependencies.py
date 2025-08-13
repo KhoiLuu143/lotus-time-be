@@ -31,3 +31,7 @@ async def get_current_user(
     if user is None:
         raise credentials_exception
     return user
+
+def check_admin(user: User):
+    if user.role != "ADMIN":
+        raise HTTPException(status_code=403, detail="Not authorized to perform this action")

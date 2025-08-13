@@ -1,10 +1,12 @@
 from uuid import UUID as uuid
+from uuid import uuid4
 from datetime import datetime
 from sqlmodel import SQLModel, Field
 
 class User(SQLModel, table=True):
     __tablename__ = "users"
-    id: uuid = Field(default=None, primary_key=True)
+    
+    id: uuid = Field(default_factory=uuid4, primary_key=True)
     username: str = Field(index=True, unique=True, nullable=False)
     email: str = Field(index=True, unique=True, nullable=False)
     full_name: str = Field(nullable=False, default="")
