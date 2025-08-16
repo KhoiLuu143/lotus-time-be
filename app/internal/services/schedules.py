@@ -1,9 +1,6 @@
 from datetime import datetime
-from uuid import UUID as uuid
-from pydantic import BaseModel
-from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import Session
-from internal.database.session import get_session
+from fastapi import HTTPException
+from sqlmodel import Session, select
 from schemas.schedules import ScheduleCreate, ScheduleUpdate
 from models.schedules import Schedules
 
@@ -54,3 +51,13 @@ def delete_schedule(schedule_id: str, session: Session):
     session.delete(schedule)
     session.commit()
     return {"message": "Schedule deleted successfully"}
+
+def get_today_schedules(session: Session):
+    today = datetime.today().date()
+    schedules = session.exec(
+        select(Schedules)
+        .where(Schedules.start_time >= today)
+        .order_by(Schedules.start_time)
+        .limit(3)
+    ).all()
+    return schedules

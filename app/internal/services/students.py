@@ -1,8 +1,10 @@
 from models.students import Students
 from schemas.students import StudentRead, StudentCreate, StudentUpdate
 from fastapi import HTTPException
-from sqlmodel import Session, select
+from sqlmodel import Session, select, func
 from datetime import datetime
+from models.schedules import Schedules
+from models.attendance import Attendance
 
 def get_students(session: Session):
     students = session.exec(select(Students)).all()
@@ -47,3 +49,21 @@ def delete_student(student_id: str, session: Session):
     session.delete(student)
     session.commit()
     return {"message": "Student deleted successfully"}
+
+def get_student_dashboard_data(session: Session, user_id: str):
+    student = session.exec(select(Students).where(Students.user_id == user_id)).first()
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+    
+    student_id = student.id
+    
+    return {
+        "role": "STUDENT",
+        "class": student.class_id,
+        "schedule_count": session.exec(select(Schedules).where(Schedules.class_id == student.class_id)).count(),
+        "attended": session.exec(select(Attendance).where(Attendance.student_id == student_id)).count(),
+        "attendance_rate": session.exec(select(Attendance).where(Attendance.student_id == student_id)).count() / session.exec(select(Schedules).where(Schedules.class_id == student.class_id)).count() if session.exec(select(Schedules).where(Schedules.class_id == student.class_id)).count() > 0 else 0
+    }
+
+def get_student_count(session: Session) -> int:
+    return session.exec(select(func.count(Students.id))).one()

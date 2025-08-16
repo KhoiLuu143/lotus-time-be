@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import users, auth, classes, students, teachers, rooms, schedules, action_logs
+from routers import users, auth, classes, students, teachers, rooms, schedules, action_logs, attendance
 
 app = FastAPI()
 
@@ -21,3 +21,4 @@ app.include_router(teachers.router, prefix="/api", tags=["teachers"])
 app.include_router(rooms.router, prefix="/api", tags=["rooms"])
 app.include_router(schedules.router, prefix="/api", tags=["schedules"])
 app.include_router(action_logs.router, prefix="/api", tags=["action_logs"])
+app.include_router(attendance.router, prefix="/api", tags=["attendance"])

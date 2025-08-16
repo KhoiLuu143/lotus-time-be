@@ -14,14 +14,14 @@ def read_users(session: Session = Depends(get_session), current_user: User = Dep
         raise HTTPException(status_code=403, detail="Not enough permissions")
     return service.get_users(session)
 
-@router.get("/{user_id}", summary="Get user by id", response_model=dto.UserRead)
-def read_user(user_id: str, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
-    if current_user.role != "ADMIN":
-        raise HTTPException(status_code=403, detail="Not enough permissions")
-    user = service.get_user_by_id(session, user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
+# @router.get("/{user_id}", summary="Get user by id", response_model=dto.UserRead)
+# def read_user(user_id: str, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+#     if current_user.role != "ADMIN":
+#         raise HTTPException(status_code=403, detail="Not enough permissions")
+#     user = service.get_user_by_id(session, user_id)
+#     if not user:
+#         raise HTTPException(status_code=404, detail="User not found")
+#     return user
 
 @router.get("/me", summary="Get current user", response_model=dto.UserRead)
 def read_current_user(user: User = Depends(get_current_user)):
@@ -40,4 +40,8 @@ def delete_user(user_id: str, session: Session = Depends(get_session)):
     if not success:
         raise HTTPException(status_code=404, detail="User not found")
     return {"message": "Deleted"}
+
+@router.get("/dashboard", summary="Get user dashboard data")
+def get_user_dashboard(session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    return service.get_user_dashboard_data(session, current_user.id)
 

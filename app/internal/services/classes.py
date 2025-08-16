@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import Session, select
+from sqlmodel import Session, select, func
 from schemas.classes import ClassCreate, ClassRead, ClassUpdate
 from models.classes import Classes
 from uuid import UUID as uuid 
@@ -49,3 +49,6 @@ def delete_class(class_id: str, session: Session):
     session.delete(cls)
     session.commit()
     return {"message": "Class deleted successfully"}
+
+def get_class_count(session: Session) -> int:
+    return session.exec(select(func.count(Classes.id))).one()
